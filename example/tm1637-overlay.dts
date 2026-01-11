@@ -1,0 +1,20 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "brcm,bcm2835";
+
+    fragment@0 {
+        target = <&soc>;
+        __overlay__ {
+            tm1637 {
+                compatible = "titanmec,tm1637";
+                clk-gpios = <&gpio 26 0>;  /* GPIO 26 (Pin 37) */
+                dio-gpios = <&gpio 19 0>;  /* GPIO 19 (Pin 35) */
+
+                bit-delay-us = <100>;
+                status = "okay";
+            };
+        };
+    };
+};

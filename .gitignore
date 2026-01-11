@@ -1,0 +1,60 @@
+# Kernel module build artifacts
+*.o
+*.ko
+*.mod
+*.mod.c
+*.cmd
+*.symvers
+*.order
+*.markers
+.tmp_versions/
+modules.order
+Module.symvers
+
+# Compiled object files
+*.a
+*.lo
+*.la
+*.so
+*.so.*
+
+# Debug files
+*.dwo
+*.su
+
+# Build directory
+build/
+
+# Device tree overlays
+*.dtbo
+
+# Kconfig
+*_defconfig
+.config
+.config.old
+*.orig
+
+# Editor and IDE files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Dependency files
+.depend
+.*.d
+
+# Core dumps
+core
+vgcore.*
+
+# Tags and cscope
+tags
+TAGS
+cscope.*
