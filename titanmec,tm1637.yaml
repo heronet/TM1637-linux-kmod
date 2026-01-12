@@ -4,27 +4,26 @@
 $id: http://devicetree.org/schemas/auxdisplay/titanmec,tm1637.yaml#
 $schema: http://devicetree.org/meta-schemas/core.yaml#
 
-title: TitanMec TM1637 7-segment LED display controller
+title: TM1637 7-segment LED display controller
 
 maintainers:
   - Siratul Islam <email@sirat.me>
 
 description:
-  The TM1637 is a LED driver IC with keyboard scan interface. It is commonly
-  used to drive 4-digit 7-segment displays. The chip uses a simple 2-wire
-  serial interface (clock and data).
+  The TM1637 is a 7-segment LED display controller with a two-wire serial
+  interface. It can drive up to 4 digits and includes brightness control.
 
 properties:
   compatible:
     const: titanmec,tm1637
 
   clk-gpios:
-    description: GPIO connected to the CLK pin
     maxItems: 1
+    description: GPIO for clock line
 
   dio-gpios:
-    description: GPIO connected to the DIO (data I/O) pin
     maxItems: 1
+    description: GPIO for data input/output line
 
 required:
   - compatible
@@ -37,7 +36,7 @@ examples:
   - |
     #include <dt-bindings/gpio/gpio.h>
 
-    tm1637_display {
+    display {
         compatible = "titanmec,tm1637";
         clk-gpios = <&gpio 23 GPIO_ACTIVE_HIGH>;
         dio-gpios = <&gpio 24 GPIO_ACTIVE_HIGH>;
