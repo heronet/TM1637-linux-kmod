@@ -33,12 +33,11 @@
 
 #define TM1637_DIGITS 4
 
-struct tm1637
-{
+struct tm1637 {
 	struct device *dev;
 	struct gpio_desc *clk;
 	struct gpio_desc *dio;
-	struct mutex lock;
+	struct mutex lock; /* Protects display buffer and brightness */
 	u8 brightness;
 	u8 buf[TM1637_DIGITS];
 };
@@ -76,8 +75,7 @@ static bool tm1637_write_byte(struct tm1637 *tm, u8 data)
 	bool ack;
 	int i;
 
-	for (i = 0; i < 8; i++)
-	{
+	for (i = 0; i < 8; i++) {
 		gpiod_set_value(tm->clk, 0);
 		tm1637_delay();
 
@@ -125,13 +123,9 @@ static void tm1637_update_display_locked(struct tm1637 *tm)
 	tm1637_stop(tm);
 
 	if (tm->brightness == 0)
-	{
 		ctrl_cmd = 0;
-	}
 	else
-	{
 		ctrl_cmd = TM1637_DISPLAY_ON | ((tm->brightness - 1) & TM1637_BRIGHTNESS_MASK);
-	}
 
 	tm1637_start(tm);
 	tm1637_write_byte(tm, ctrl_cmd);
@@ -145,15 +139,13 @@ static void tm1637_update_display(struct tm1637 *tm)
 	mutex_unlock(&tm->lock);
 }
 
-static ssize_t message_show(struct device *dev, struct device_attribute *attr,
-							char *buf)
+static ssize_t message_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	struct tm1637 *tm = dev_get_drvdata(dev);
 	int i, pos = 0;
 
 	mutex_lock(&tm->lock);
-	for (i = 0; i < TM1637_DIGITS; i++)
-	{
+	for (i = 0; i < TM1637_DIGITS; i++) {
 		pos += sysfs_emit_at(buf, pos, "0x%02x", tm->buf[i]);
 		if (i < TM1637_DIGITS - 1)
 			pos += sysfs_emit_at(buf, pos, " ");
@@ -165,7 +157,7 @@ static ssize_t message_show(struct device *dev, struct device_attribute *attr,
 }
 
 static ssize_t message_store(struct device *dev, struct device_attribute *attr,
-							 const char *buf, size_t count)
+			     const char *buf, size_t count)
 {
 	struct tm1637 *tm = dev_get_drvdata(dev);
 	size_t i, pos = 0;
@@ -176,9 +168,9 @@ static ssize_t message_store(struct device *dev, struct device_attribute *attr,
 	if (len > 0 && buf[len - 1] == '\n')
 		len--;
 
-	for (i = 0; i < len && pos < TM1637_DIGITS; i++)
-	{
+	for (i = 0; i < len && pos < TM1637_DIGITS; i++) {
 		char c = buf[i];
+
 		if (c == '.')
 			continue;
 
@@ -199,8 +191,7 @@ static ssize_t message_store(struct device *dev, struct device_attribute *attr,
 }
 static DEVICE_ATTR_RW(message);
 
-static ssize_t brightness_show(struct device *dev,
-							   struct device_attribute *attr, char *buf)
+static ssize_t brightness_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	struct tm1637 *tm = dev_get_drvdata(dev);
 	unsigned int brightness;
@@ -212,9 +203,8 @@ static ssize_t brightness_show(struct device *dev,
 	return sysfs_emit(buf, "%u\n", brightness);
 }
 
-static ssize_t brightness_store(struct device *dev,
-								struct device_attribute *attr,
-								const char *buf, size_t count)
+static ssize_t brightness_store(struct device *dev, struct device_attribute *attr,
+				const char *buf, size_t count)
 {
 	struct tm1637 *tm = dev_get_drvdata(dev);
 	unsigned int brightness;
@@ -228,8 +218,7 @@ static ssize_t brightness_store(struct device *dev,
 		brightness = TM1637_BRIGHTNESS_MAX + 1;
 
 	mutex_lock(&tm->lock);
-	if (tm->brightness != brightness)
-	{
+	if (tm->brightness != brightness) {
 		tm->brightness = brightness;
 		tm1637_update_display_locked(tm);
 	}
